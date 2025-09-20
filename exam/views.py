@@ -563,6 +563,9 @@ class StudentExamView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context = super().get_context_data(**kwargs)
         exam = self.get_object()
         student = self.request.user
+
+        exam_status = exam.get_status_for_student(student)
+        context['exam_status'] = exam_status
         
         # Get attempt information
         context['attempts_made'] = exam.get_student_attempts(student)

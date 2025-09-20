@@ -204,7 +204,7 @@ class StudentProfileView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     def test_func(self):
         return self.request.user.user_type == 'student'
     
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, total_exams_taken=None, **kwargs):
         context = super().get_context_data(**kwargs)
         student = self.request.user
         
@@ -213,7 +213,10 @@ class StudentProfileView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             student=student,
             is_completed=True
         ).select_related('exam').order_by('-submitted_at')
-        
+
+        if total_exams_taken is None:
+            total_exams_taken = all_submissions.count()
+
         # Calculate average score
         if total_exams_taken > 0:
             avg_score = all_submissions.aggregate(
