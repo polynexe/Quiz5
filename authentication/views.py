@@ -42,6 +42,8 @@ class CustomLoginView(LoginView):
 
 
 class CustomLogoutView(RedirectView):
+
+    url = reverse_lazy('authentication:signin')
     
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
