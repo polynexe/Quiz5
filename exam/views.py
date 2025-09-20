@@ -1,3 +1,4 @@
+from django.db.models.aggregates import Max
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, TemplateView
@@ -451,7 +452,7 @@ class ExamDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         student_data = []
         for student in eligible_students:
             try:
-                submission = ExamSubmission.objects.get(exam=exam, student=student)
+                submission = ExamSubmission.objects.filter(exam=exam, student=student)
                 if submission.is_completed:
                     status = 'Completed'
                     score_display = f"{submission.score}/{submission.total_marks} ({submission.percentage:.1f}%)"
@@ -464,6 +465,14 @@ class ExamDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
                 status = 'Not Started'
                 score_display = 'Did not take yet'
                 submitted_at = None
+
+            except ExamSubmission.MultipleObjectsReturned:
+                highest_submission = ExamSubmission.objects.filter(
+                    exam=exam, student=student
+                ).aggregate(
+                    max_score=Max('score')
+                )
+                highest_score = highest_submission['max_score']
             
             student_data.append({
                 'student': student,
