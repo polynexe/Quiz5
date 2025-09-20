@@ -220,6 +220,9 @@ class ExamCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = ExamForm
     template_name = 'exam/create_exam.html'
 
+    def test_func(self):
+        return self.request.user.is_teacher
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Add student count information for better user experience
